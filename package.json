@@ -2,7 +2,7 @@
   "name": "phojs",
   "version": "1.0.0",
   "description": "Declarative configuration framework",
-  "main": "main.js",
+  "main": "src/index.js",
   "license": "MIT",
   "dependencies": {
     "fdir": "^5.1.0",

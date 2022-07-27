@@ -1,8 +1,8 @@
-const { Category } = require('./src/category')
-const { FieldLogic } = require('./src/field-logic')
-const { FieldType } = require('./src/field-type')
-const { loadDefinitions } = require('./src/definition-loader')
-const { FieldValidationError, DependencyCycleError } = require('./src/errors')
+const { Category } = require('./category')
+const { FieldLogic } = require('./field-logic')
+const { FieldType } = require('./field-type')
+const { loadDefinitions } = require('./definition-loader')
+const { FieldValidationError, DependencyCycleError } = require('./errors')
 
 const _globalRootInstance = new Category()
 
