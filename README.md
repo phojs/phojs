@@ -1,7 +1,7 @@
 <div align="center">
 
 ![phojs logo](https://user-images.githubusercontent.com/2085411/181236639-0d528c9a-141d-47c4-94a7-eef5677eb836.png)
-#  Pho
+# Phở
 ### <i>The super-tasty configuration framework</i>
 
 Allows you to define configuration declaratively together supercharged validation and flexability.
