@@ -30,16 +30,19 @@ Each module should require the 'phojs' and define the categories and fields it u
 ```javascript
 const pho = require('phojs')
 
-pho.field('firstname', 'string', 'Your first name').required()
-pho.field('lastname', 'string', 'Your last name').required()
-pho.field('nickname', 'string, 'Your nickname')
-  .required().
-  .oneOf('Neo', 'Morpheus', 'Trinity')
-pho.field('age', 'number', 'Your age')
+pho.create(async (root) => {
+  root.field('firstname', 'string', 'Your first name').required()
+  root.field('lastname', 'string', 'Your last name').required()
+  root.field('nickname', 'string', 'Your nickname')
+    .required()
+    .oneOf('Neo', 'Morpheus', 'Trinity')
+  root.field('age', 'number', 'Your age')
 
-const measurements = pho.category('measurements', 'Body Measurements')
-measurements.field('height', 'number', 'Your height in centimeters')
-measurements.field('weight', 'number', 'Your weight in kilograms')
+  root.category('measurements', 'Body Measurements', (measurements) => {
+    measurements.field('height', 'number', 'Your height in centimeters')
+    measurements.field('weight', 'number', 'Your weight in kilograms')
+  })
+})
 
 const validatedConfig = pho.parse({
   firstname: 'Kaladin',
@@ -63,22 +66,28 @@ Modifiers are run before validators.
 ```javascript
 const {pho, FieldValidationError} = require('phojs')
 
-pho.field('first', 'number', 'First number').required()
-pho.field('second', 'number', 'Second number').required()
+pho.create((root) => {
+  root.field('first', 'number', 'First number').required()
+  root.field('second', 'number', 'Second number').required()
 
-const calcs = pho.category('calculations', 'Calculation results')
-calcs
-.field('sum', 'number', 'Sum of first and second')
-  .modify('sum', (field, value, first, second) => first + second, ['first', 'second']) // sum needs both first and second to work
-  .validate('ensure upper bound', (field, value) => {
-    if (value > 1000){
-      throw new FieldValidationError(`Sum is too big (value=${value})`)
-    }
+  pho.category('calculations', 'Calculation results', (calculations) => {
+    calculations
+      .field('sum', 'number', 'Sum of first and second')
+      .modify('sum', (field, value, first, second) => first + second, ['first', 'second']) // sum needs both first and second to work
+      .validate('ensure upper bound', (field, value) => {
+        if (value > 1000){
+          throw new FieldValidationError(`Sum is too big (value=${value})`)
+        }
+      })
   })
 
-const stats = pho.category('statistics', 'Number statistics')
-stats.field('avg', 'number', 'average of the first and second')
-  .modify('avg', (field, value, sum) => sum / 2, ['calculations.sum'])
+  root.category('statistics', 'Number statistics', (stats) => {
+    stats.field('avg', 'number', 'average of the first and second')
+      .modify('avg', (field, value, sum) => sum / 2, ['calculations.sum'])
+    })
+  })
+})
+
 
 const result = pho.parse({
   first: 10,
