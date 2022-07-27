@@ -1,10 +1,15 @@
-# Pho
+<div align="center">
 
-## Overview
+![phojs logo](https://user-images.githubusercontent.com/2085411/181236639-0d528c9a-141d-47c4-94a7-eef5677eb836.png)
+#  Pho
+### <i>The super-tasty configuration framework</i>
 
-Pho allows you to define you configuration field declaratively alongside supercharged validation and flexability.
-Inspired by the popular python library [flag](https://abseil.io/docs/python/guides/flags), and [cerberus](https://github.com/pyeve/cerberus).
-Each module declares the configuration fields and categories it uses, which are registered to the global pho instance when they are imported.
+Allows you to define configuration declaratively together supercharged validation and flexability.
+  
+Inspired by the popular python libraries [flag](https://abseil.io/docs/python/guides/flags), and [cerberus](https://github.com/pyeve/cerberus).
+
+</div>
+
 
 ## Installation
 
@@ -55,7 +60,7 @@ These validators/modifiers can depend on other fields to work, so they we will c
 _Note_:
 Modifiers are run before validators.
 
-```
+```javascript
 const {pho, FieldValidationError} = require('phojs')
 
 pho.field('first', 'number', 'First number').required()
@@ -105,5 +110,5 @@ $ npm install
 $ yarn
 
 # run tests
-$ npm test
+$ yarn test
 ```
