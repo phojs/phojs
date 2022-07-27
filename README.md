@@ -25,8 +25,6 @@ yarn add phojs
 
 #### Basic
 
-Each module should require the 'phojs' and define the categories and fields it uses.
-
 ```javascript
 const pho = require('phojs')
 
@@ -57,9 +55,10 @@ const validatedConfig = pho.parse({
 
 #### Field Dependencies
 
-Fields can have validators and modifiers attached to them. pho provides some basic ones,
-but of course custom validators / modifiers are supported.
-These validators/modifiers can depend on other fields to work, so they we will called with their dependencies are arguments.
+Fields can have validators and modifiers attached to them. 
+pho provides some basic ones, but you can write your own of course :)
+
+These validators/modifiers can depend on other fields to in order to work, so they we will called with their dependencies are arguments.
 _Note_:
 Modifiers are run before validators.
 
@@ -73,7 +72,7 @@ pho.create((root) => {
   pho.category('calculations', 'Calculation results', (calculations) => {
     calculations
       .field('sum', 'number', 'Sum of first and second')
-      .modify('sum', (field, value, first, second) => first + second, ['first', 'second']) // sum needs both first and second to work
+      .modify('sum', (field, value, first, second) => first + second, ['first', 'second']) // sum field needs both first and second to make sense
       .validate('ensure upper bound', (field, value) => {
         if (value > 1000){
           throw new FieldValidationError(`Sum is too big (value=${value})`)
