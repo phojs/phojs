@@ -4,7 +4,7 @@
 # Phở
 ### <i>The super-tasty configuration framework</i>
 
-Allows you to define configuration declaratively together supercharged validation and flexability.
+Allows you to define configuration declaratively together with supercharged validation and flexability.
   
 Inspired by the popular python libraries [flag](https://abseil.io/docs/python/guides/flags), and [cerberus](https://github.com/pyeve/cerberus).
 
