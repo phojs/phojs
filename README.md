@@ -69,7 +69,7 @@ pho.create((root) => {
   root.field('first', 'number', 'First number').required()
   root.field('second', 'number', 'Second number').required()
 
-  pho.category('calculations', 'Calculation results', (calculations) => {
+  root.category('calculations', 'Calculation results', (calculations) => {
     calculations
       .field('sum', 'number', 'Sum of first and second')
       .modify('sum', (field, value, first, second) => first + second, ['first', 'second']) // sum field needs both first and second to make sense
