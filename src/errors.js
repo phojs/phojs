@@ -9,7 +9,7 @@ class FieldValidationError extends PhoError {}
 
 class ExcludedFieldError extends PhoError {}
 class DependencyCycleError extends PhoError {}
-class CategoryIsFieldError extends PhoError {}
+class DuplicateDefinitionError extends PhoError {}
 
 class InvalidFieldTypeError extends PhoError {}
 
@@ -21,7 +21,7 @@ module.exports = {
   InvalidChoiceSelectedError,
   ExcludedFieldError,
   DependencyCycleError,
-  CategoryIsFieldError,
+  DuplicateDefinitionError,
   InvalidFieldTypeError,
   FieldValidationError,
 }

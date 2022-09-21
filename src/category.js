@@ -1,13 +1,22 @@
 const rootLogger = require('./root-logger')
 const { Field } = require('./field')
 const { ArrayField } = require('./array-field')
-const { InvalidFieldNameError, CategoryIsFieldError } = require('./errors')
+const { InvalidFieldNameError, DuplicateDefinitionError } = require('./errors')
 const { FSDefinitionLoader } = require('./definition-loader')
 const { PhoContext } = require('./context')
+
 
 function ensureValidName(name) {
   if (name.indexOf('.') !== -1) {
     throw new InvalidFieldNameError(`Dots ('.') are not allowed in field names`)
+  }
+}
+
+function ensureNameNotDuplicate(obj, name, typeName) {
+  if (obj) {
+    throw new DuplicateDefinitionError(
+        `Tried to define ${name} as ${typeName}, but it is already defined as something else`
+    )
   }
 }
 
@@ -31,9 +40,9 @@ class Category {
   field(name, type, description, defaultValue) {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
-    if (this.phoContext.definitions[childFullPath]) {
-      return this.phoContext.definitions[childFullPath]
-    }
+
+    ensureNameNotDuplicate(this.phoContext.definitions[childFullPath], name, Field)
+
     this.log('Adding new Field(', name, ',', childFullPath, ',', type, ',', description, ',', defaultValue, ')')
     this.phoContext.definitions[childFullPath] = new Field(
       this.phoContext,
@@ -50,21 +59,12 @@ class Category {
   category(name, description, cb = null) {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
+    ensureNameNotDuplicate(this.phoContext.definitions[childFullPath], name, Category)
 
-    if (this.phoContext.definitions[childFullPath]) {
-      if (!(this.phoContext.definitions[childFullPath] instanceof Category)) {
-        throw new CategoryIsFieldError(
-          `Tried to define ${childFullPath} as category, but is already defined as something else`
-        )
-      }
-      if (!this.phoContext.definitions[childFullPath].description && description) {
-        this.phoContext.definitions[childFullPath].description = description
-      }
-    } else {
-      this.log('Adding new Category(', name, ',', childFullPath, ',', description, ')')
-      this.phoContext.definitions[childFullPath] = new Category(this.phoContext, name, childFullPath, description)
-      this.phoContext.schema.addEdge(this.fullPath ?? '__root', childFullPath)
-    }
+    this.log('Adding new Category(', name, ',', childFullPath, ',', description, ')')
+    this.phoContext.definitions[childFullPath] = new Category(this.phoContext, name, childFullPath, description)
+    this.phoContext.schema.addEdge(this.fullPath ?? '__root', childFullPath)
+
     if (cb) {
       cb(this.phoContext.definitions[childFullPath])
     }
@@ -75,9 +75,8 @@ class Category {
   array(name, description, defaultValue) {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
-    if (this.phoContext.definitions[childFullPath]) {
-      return this.phoContext.definitions[childFullPath]
-    }
+    ensureNameNotDuplicate(this.phoContext.definitions[childFullPath], name, ArrayField)
+
     this.log('Adding new Array(', name, ',', childFullPath, ',', description, ',', defaultValue, ')')
     this.phoContext.definitions[childFullPath] = new ArrayField(
       this.phoContext,

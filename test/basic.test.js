@@ -82,4 +82,21 @@ describe('Basic Tests', function () {
     expect(pho.parse({})).toStrictEqual(expected)
     expect(pho.parse({ firstname: 'Luke' })).toStrictEqual({ ...expected, firstname: 'Luke' })
   })
+
+  test('field and category cannot have the same name', () => {
+    const pho = new Pho()
+
+    pho.field('a')
+    expect(() => pho.category('a')).toThrow()
+
+    pho.category('b')
+    expect(() => pho.field('b')).toThrow()
+
+    pho.array('c')
+    expect(() => pho.field('c')).toThrow()
+
+    // sanity
+    pho.field('d')
+    expect(() => pho.array('e')).not.toThrow()
+  })
 })
