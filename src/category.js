@@ -52,7 +52,7 @@ class Category {
     const childFullPath = createFullPath(this.fullPath, name)
 
     if (this.phoContext.definitions[childFullPath]) {
-      if (!this.phoContext.definitions[childFullPath] instanceof Category) {
+      if (!(this.phoContext.definitions[childFullPath] instanceof Category)) {
         throw new CategoryIsFieldError(
           `Tried to define ${childFullPath} as category, but is already defined as something else`
         )
@@ -166,10 +166,12 @@ class Category {
     for (const [fieldName, fieldDefinition] of Object.entries(this.phoContext.definitions)) {
       const row = {
         description: fieldDefinition.description,
-        type: fieldDefinition.type,
+      }
+      if (fieldDefinition.type !== undefined) { // currently, category has no type
+        row.type = fieldDefinition.type
       }
       if (fieldDefinition.defaultValue !== undefined) {
-        row.defaultValue = fieldDefinition
+        row.defaultValue = fieldDefinition.defaultValue
       }
       result[fieldName] = row
     }
