@@ -1,8 +1,8 @@
 {
   "name": "phojs",
-  "version": "0.1.0",
+  "version": "0.1.2",
   "description": "Declarative configuration framework",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "license": "MIT",
   "dependencies": {
     "debug": "^4.3.4",
@@ -10,10 +10,13 @@
     "graph-data-structure": "^2.0.0",
     "yargs": "^17.3.1"
   },
+  "types": "dist/index.d.ts",
   "files": [
-    "README.md"
+    "README.md",
+    "dist/"
   ],
   "scripts": {
+    "build": "tsc",
     "test": "jest test/",
     "coverage": "c8 jest test/"
   },
@@ -21,9 +24,11 @@
     "pho": "src/cli/main.js"
   },
   "devDependencies": {
+    "@types/debug": "^4.1.7",
     "c8": "^7.10.0",
     "jest": "^27.4.5",
     "jgf-dot": "^1.1.1",
-    "prettier": "^2.8.0"
+    "prettier": "^2.8.0",
+    "typescript": "^4.9.3"
   }
 }
