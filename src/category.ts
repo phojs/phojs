@@ -1,17 +1,16 @@
-const rootLogger = require('./root-logger')
-const { Field } = require('./field')
-const { ArrayField } = require('./array-field')
-const { InvalidFieldNameError, CategoryIsFieldError } = require('./errors')
-const { FSDefinitionLoader } = require('./definition-loader')
-const { PhoContext } = require('./context')
+import rootLogger from './root-logger'
+import { Field } from './field'
+import { ArrayField } from './array-field'
+import { InvalidFieldNameError, CategoryIsFieldError } from './errors'
+import { PhoContext } from './context'
 
-function ensureValidName(name) {
+function ensureValidName(name: string) {
   if (name.indexOf('.') !== -1) {
     throw new InvalidFieldNameError(`Dots ('.') are not allowed in field names`)
   }
 }
 
-function createFullPath(parentFullPath, name) {
+function createFullPath(parentFullPath: string, name: string): string {
   if (parentFullPath) {
     return `${parentFullPath}.${name}`
   }

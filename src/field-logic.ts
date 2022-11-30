@@ -1,12 +1,15 @@
-import { Field } from "./field"
+import type { Field } from "./field"
+
+export type FieldFunc = (field: Field<any>, fieldValue: any, args?: any[], ...dependencies: any[]) => void
 
 export class FieldLogic {
   name: string
   dependenciesRequired: boolean
-  fn: any
+  fn: FieldFunc 
   args: any[]
   dependsOn: string[]
-  constructor(name: string, fn: any, args: any[] = [], dependsOn: string[] = [], dependenciesRequired = false) {
+
+  constructor(name: string, fn: FieldFunc, args: any[] = [], dependsOn: string[] = [], dependenciesRequired = false) {
     this.name = name
     this.fn = fn
     this.args = args
@@ -15,7 +18,7 @@ export class FieldLogic {
     this.dependenciesRequired = dependenciesRequired
   }
 
-  run(field: Field, fieldValue: any, ...dependencies:any[]) {
+  run(field: Field<any>, fieldValue: any, ...dependencies:any[]) {
     if (Array.isArray(this.args) && this.args.length === 0) {
       return this.fn(field, fieldValue, ...dependencies)
     }

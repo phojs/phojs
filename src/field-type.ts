@@ -1,4 +1,4 @@
-const { FieldLogic } = require('./field-logic')
+import { FieldLogic } from './field-logic'
 
 export class FieldType extends FieldLogic {
   toString() {

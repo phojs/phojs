@@ -1,12 +1,13 @@
-const process = require("process");
-const { FieldLogic } = require("./field-logic");
-const { MissingDependencyError } = require("./errors");
-const { FieldType } = require("./field-type");
-const {
+import process from "process";
+import debug from 'debug'
+import { FieldFunc, FieldLogic } from "./field-logic"
+import { MissingDependencyError } from "./errors"
+import { FieldType } from "./field-type"
+import {
   required,
   oneOf,
   dependsOn,
-  excludeFields,
+  excludeField,
   typeValidation,
   deprecated,
 
@@ -14,12 +15,24 @@ const {
   greaterThan,
   lowerThanOrEqualTo,
   lowerThan,
-} = require("./validation-functions");
+} from "./validation-functions";
 
-const rootLogger = require("./root-logger");
+import rootLogger from "./root-logger";
+import { PhoContext } from "../dist/context";
+import { IField } from "./types";
 
-class Field {
-  constructor(phoContext, name, fullPath, type, description, defaultValue) {
+export class Field<T> implements IField{
+  name: string;
+  fullPath: string;
+  type: any;
+  description: string;
+  defaultValue: T;
+  phoContext: PhoContext
+  log: debug.Debugger
+  modifiers: any[]
+  validators: any[]
+
+  constructor(phoContext: PhoContext, name: string, fullPath: string, type: any, description: string, defaultValue: T) {
     this.name = name;
     this.fullPath = fullPath;
     this.type = type;
@@ -55,7 +68,7 @@ class Field {
   /*
    * @param fieldLogic - FieldLogic object
    */
-  handleDependencies(fieldLogic) {
+  handleDependencies(fieldLogic: FieldLogic) {
     this.log.extend("handleDependencies")(fieldLogic);
     if (fieldLogic.dependsOn.length > 0) {
       this.log("Unlinking from root");
@@ -68,17 +81,17 @@ class Field {
     });
   }
 
-  addValidator(validator) {
+  addValidator(validator: FieldLogic) {
     this.validators.push(validator);
     this.handleDependencies(validator);
   }
 
-  addModifier(modifier) {
+  addModifier(modifier: FieldLogic) {
     this.modifiers.push(modifier);
     this.handleDependencies(modifier);
   }
 
-  getDependencyValues(fieldLogic) {
+  getDependencyValues(fieldLogic: FieldLogic) {
     let dependantFieldValues = [];
     for (const dependencyName of fieldLogic.dependsOn) {
       const depValue = this.phoContext.getFieldValue(dependencyName);
@@ -92,7 +105,7 @@ class Field {
     return dependantFieldValues;
   }
 
-  parse(value) {
+  parse(value: object) {
     const parserLog = this.log.extend("parser");
     parserLog(this.fullPath, "parsing", value, "default =", this.defaultValue);
 
@@ -113,12 +126,12 @@ class Field {
     return current;
   }
 
-  validate(name, validateFunc, dependsOn = [], args = []) {
+  validate(name: string, validateFunc: FieldFunc, dependsOn: string[] = [], args:any[] = []) {
     this.addValidator(new FieldLogic(name, validateFunc, args, dependsOn));
     return this;
   }
 
-  modify(name, validateFunc, dependsOn = [], args = []) {
+  modify(name: string, validateFunc: FieldFunc, dependsOn = [], args = []) {
     this.addModifier(new FieldLogic(name, validateFunc, args, dependsOn));
     return this;
   }
@@ -127,7 +140,7 @@ class Field {
    * This field can only be defined if the given fields are also defined.
    * @param fieldNames - varargs of all the fields that should exist
    */
-  dependsOn(...fieldNames) {
+  dependsOn(...fieldNames: string[]) {
     this.validate("dependsOn", dependsOn, fieldNames, fieldNames);
     return this;
   }
@@ -250,7 +263,7 @@ class Field {
     return this;
   }
 
-  fromEnv(envVarName) {
+  fromEnv(envVarName: string) {
     this.modify(`load from ENV ${envVarName}`, (field, value) => {
       // if value is not given, override it with the value from the env var
       const envValue = process.env[envVarName];
@@ -269,7 +282,3 @@ class Field {
     return this;
   }
 }
-
-module.exports = {
-  Field,
-};
