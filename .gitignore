@@ -1,0 +1,8 @@
+dist/
+node_modules/
+*.log
+.env*
+*.swp
+*.vscode/
+.DS_Store
+.idea/
