@@ -1,25 +1,37 @@
-const rootLogger = require('./root-logger')
-const { Field } = require('./field')
-const { ArrayField } = require('./array-field')
-const { InvalidFieldNameError, CategoryIsFieldError } = require('./errors')
-const { FSDefinitionLoader } = require('./definition-loader')
-const { PhoContext } = require('./context')
+import rootLogger from './root-logger'
+import { Field } from './field'
+import { ArrayField } from './array-field'
+import { InvalidFieldNameError, CategoryIsFieldError } from './errors'
+import { PhoContext } from './context'
+import debug from 'debug'
+import { TypeName } from './types'
 
-function ensureValidName(name) {
+function ensureValidName(name: string) {
   if (name.indexOf('.') !== -1) {
     throw new InvalidFieldNameError(`Dots ('.') are not allowed in field names`)
   }
 }
 
-function createFullPath(parentFullPath, name) {
+function createFullPath(parentFullPath: string | null, name: string): string {
   if (parentFullPath) {
     return `${parentFullPath}.${name}`
   }
   return name
 }
 
-class Category {
-  constructor(phoContext = null, name = null, fullPath = null, description = null) {
+export class Category {
+  phoContext: PhoContext
+  name: string | null
+  fullPath: string | null
+  description: null | string
+  log: debug.Debugger
+
+  constructor(
+    phoContext: null | PhoContext = null,
+    name: string | null = null,
+    fullPath: string | null = null,
+    description: string | null = null
+  ) {
     this.phoContext = phoContext ?? new PhoContext()
     this.name = name // null means root
     this.fullPath = fullPath
@@ -28,7 +40,7 @@ class Category {
     this.log = rootLogger.extend(fullPath ?? 'Pho')
   }
 
-  field(name, type, description, defaultValue) {
+  field<T>(name: string, type: TypeName, description: string, defaultValue: T) {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
     if (this.phoContext.definitions[childFullPath]) {
@@ -47,12 +59,12 @@ class Category {
     return this.phoContext.definitions[childFullPath]
   }
 
-  category(name, description, cb = null) {
+  category(name: string, description: string, cb: ((cat: Category) => void) | null = null) {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
 
     if (this.phoContext.definitions[childFullPath]) {
-      if (!this.phoContext.definitions[childFullPath] instanceof Category) {
+      if (!(this.phoContext.definitions[childFullPath] instanceof Category)) {
         throw new CategoryIsFieldError(
           `Tried to define ${childFullPath} as category, but is already defined as something else`
         )
@@ -72,7 +84,7 @@ class Category {
     return this.phoContext.definitions[childFullPath]
   }
 
-  array(name, description, defaultValue) {
+  array(name: string, description: string, defaultValue: any[]) {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
     if (this.phoContext.definitions[childFullPath]) {
@@ -90,19 +102,19 @@ class Category {
     return this.phoContext.definitions[childFullPath]
   }
 
-  flattenByDefinitions(config) {
-    const fetchField = (fullPath) => {
-      let current = config
+  flattenByDefinitions(config: Record<string, any>): Record<string, any> {
+    const fetchField = (fullPath: string) => {
+      let current: Field<any> | Record<string, any> = config
       for (const part of fullPath.split('.')) {
         if (current === undefined) {
           break
         }
-        current = current[part]
+        current = (current as Record<string, any>)[part]
       }
-      return current
+      return current as any
     }
 
-    let flattenConfig = {}
+    let flattenConfig: Record<string, Field<any>> = {}
     for (const fieldFullPath of this.phoContext.schema.topologicalSort([this.fullPath ?? '__root'], false)) {
       flattenConfig[fieldFullPath] = fetchField(fieldFullPath)
     }
@@ -110,9 +122,9 @@ class Category {
   }
 
   unflattenByDefinitions() {
-    let result = {}
+    let result: any = {}
 
-    const setField = (fullPath, definition, value) => {
+    const setField = (fullPath: string, definition: any, value: any) => {
       let current = result
       const parts = fullPath.split('.')
       const lastPart = parts.slice(-1)[0]
@@ -137,7 +149,7 @@ class Category {
     return result
   }
 
-  parse(config) {
+  parse(config: object) {
     this.log('Parsing', config)
     this.phoContext.ensureNoDependencyCycles()
 
@@ -160,11 +172,10 @@ class Category {
   /**
    * Returns an object filled with field definitions full paths and their descriptions with default values
    */
-
-  describe() {
-    let result = {}
+  describe(): Record<string, DecriptionRow> {
+    let result: Record<string, DecriptionRow> = {}
     for (const [fieldName, fieldDefinition] of Object.entries(this.phoContext.definitions)) {
-      const row = {
+      const row: DecriptionRow = {
         description: fieldDefinition.description,
         type: fieldDefinition.type,
       }
@@ -181,6 +192,4 @@ class Category {
   }
 }
 
-module.exports = {
-  Category,
-}
+export type DecriptionRow = { description: string; type: TypeName; defaultValue?: any }

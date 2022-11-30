@@ -1,8 +1,30 @@
-const Graph = require('graph-data-structure')
+import Graph from 'graph-data-structure'
 
-const { DependencyCycleError } = require('./errors')
+import { DependencyCycleError } from './errors'
 
-class PhoContext {
+export interface Node {
+  id: string
+}
+
+export interface Link {
+  source: string
+  target: string
+  weight: number
+}
+
+export interface SerializedGraph {
+  graph: {
+    directed: boolean
+    nodes: Node[]
+    edges: Link[]
+  }
+}
+
+export class PhoContext {
+  definitions: Record<string, any>
+  dependencyGraph: any
+  schema: any
+  _data: Record<string, any>
   /*
    * Create a new PhoContext
    * Represents the state that is shared by all the configuration objects
@@ -21,7 +43,7 @@ class PhoContext {
    * dependencies.
    * @param fullFieldName - The full path field name (root.nested.field1)
    */
-  getFieldValue(fullFieldName) {
+  getFieldValue(fullFieldName: string) {
     return this._data[fullFieldName]
   }
 
@@ -30,7 +52,7 @@ class PhoContext {
    * @param fullFieldName - The full path field name (root.nested.field1)
    * @param value - The field's value.
    */
-  setFieldValue(fullFieldName, value) {
+  setFieldValue(fullFieldName: string, value: any) {
     this._data[fullFieldName] = value
   }
 
@@ -40,19 +62,15 @@ class PhoContext {
     }
   }
 
-  serialize() {
+  serialize(): SerializedGraph {
     const d3Graph = this.dependencyGraph.serialize()
     const result = {
       graph: {
         directed: true,
-        nodes: d3Graph.nodes,
-        edges: d3Graph.links,
+        nodes: d3Graph.nodes as Node[],
+        edges: d3Graph.links as Link[],
       },
     }
     return result
   }
-}
-
-module.exports = {
-  PhoContext,
 }

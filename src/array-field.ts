@@ -1,10 +1,12 @@
-const { Field } = require('./field')
-const { FieldValidationError } = require('./errors')
-const { FieldType } = require('./field-type')
+import { Field } from './field'
+import { FieldValidationError, InvalidFieldTypeError } from './errors'
+import { FieldType } from './field-type'
+import { IField } from './types'
+import { PhoContext } from './context'
 
-class ArrayFieldType extends FieldType {
+export class ArrayFieldType extends FieldType {
   constructor() {
-    super('ArrayField', (field, fieldValue) => {
+    super('ArrayField', (field: IField, fieldValue: any) => {
       if (!Array.isArray(fieldValue)) {
         throw new InvalidFieldTypeError(`Expected ${field.fullPath} to be an array, but its ${typeof fieldValue}`)
       }
@@ -12,44 +14,40 @@ class ArrayFieldType extends FieldType {
   }
 }
 
-class ArrayField extends Field {
-  constructor(phoContext = null, name = null, fullPath = null, description = null, defaultValue) {
+export class ArrayField extends Field<any> {
+  constructor(phoContext: PhoContext, name: string, fullPath: string, description: string, defaultValue: any[]) {
     super(phoContext, name, fullPath, new ArrayFieldType(), description, defaultValue)
   }
 
-  minimumLength(minLength) {
-    this.validate('minimum length', (field, fieldValue) => {
+  minimumLength(minLength: number) {
+    this.validate('minimum length', (field: Field<any>, fieldValue: any[]) => {
       if (fieldValue.length < minLength) {
         throw new FieldValidationError(`Expected minimum length of ${minLength} but got ${fieldValue.length}`)
       }
     })
   }
 
-  exclusiveMinimumLength(minLength) {
-    this.validate('exclusive minimum length', (field, fieldValue) => {
+  exclusiveMinimumLength(minLength: number) {
+    this.validate('exclusive minimum length', (field: Field<any>, fieldValue: any[]) => {
       if (fieldValue.length <= minLength) {
         throw new FieldValidationError(`Expected exclusive minimum length of ${minLength} but got ${fieldValue.length}`)
       }
     })
   }
 
-  maximumLength(maxLength) {
-    this.validate('maximum length', (field, fieldValue) => {
+  maximumLength(maxLength: number) {
+    this.validate('maximum length', (field: Field<any>, fieldValue: any) => {
       if (fieldValue.length > maxLength) {
         throw new FieldValidationError(`Expected maximum length of ${maxLength} but got ${fieldValue.length}`)
       }
     })
   }
 
-  exclusiveMaximumLength(maxLength) {
-    this.validate('exclusive maximum length', (field, fieldValue) => {
+  exclusiveMaximumLength(maxLength: number) {
+    this.validate('exclusive maximum length', (field: Field<any>, fieldValue: any) => {
       if (fieldValue.length >= maxLength) {
         throw new FieldValidationError(`Expected exclusive maximum length of ${maxLength} but got ${fieldValue.length}`)
       }
     })
   }
-}
-
-module.exports = {
-  ArrayField,
 }

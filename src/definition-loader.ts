@@ -1,10 +1,12 @@
-const process = require('process')
-const { fdir } = require('fdir')
+import process from 'process'
+import { fdir } from 'fdir'
+import rootLogger from './root-logger'
 
-const rootLogger = require('./root-logger')
-
-class FSDefinitionLoader {
-  constructor(appRoot = null, extensions = ['pho.js']) {
+export class FSDefinitionLoader {
+  appRoot: any
+  extensions: string[]
+  log: any
+  constructor(appRoot: null | string = null, extensions = ['pho.js']) {
     this.appRoot = appRoot ?? process.env.PHO_APP_ROOT
     this.extensions = Array.isArray(extensions) ? extensions : [extensions]
     this.log = rootLogger.extend(this.constructor.name)
@@ -26,21 +28,16 @@ class FSDefinitionLoader {
       .crawl(this.appRoot)
 
     let total = 0
-    for (const filename of crawler.sync()) {
-      this.log('Loading module', filename)
-      const module = require(filename)
-      total += 1
-    }
+    // for (const filename of crawler.sync()) {
+    //   this.log('Loading module', filename)
+    //   const module = require(filename)
+    //   total += 1
+    // }
     return total
   }
 }
 
-function loadDefinitions() {
-  const fsLoader = FSDefinitionLoader()
+export function loadDefinitions() {
+  const fsLoader = new FSDefinitionLoader()
   fsLoader.loadSync()
-}
-
-module.exports = {
-  FSDefinitionLoader,
-  loadDefinitions,
 }
