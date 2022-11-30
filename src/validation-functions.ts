@@ -1,18 +1,21 @@
-const {
+import {
   MissingRequiredFieldError,
   InvalidChoiceSelectedError,
   ExcludedFieldError,
   InvalidFieldTypeError,
   FieldValidationError,
-} = require('./errors')
+} from './errors'
+import type {Field} from './field'
 
-function required(field, fieldValue, isRequired) {
+export type TypeName = 'string' | 'number' | 'integer'
+
+export function required<T>(field: Field, fieldValue: T, isRequired: boolean) {
   if (isRequired && fieldValue === undefined) {
     throw new MissingRequiredFieldError(`Missing required field '${field.fullPath}'`)
   }
 }
 
-function oneOf(field, fieldValue, supportedChoices) {
+export function oneOf<T>(field: Field, fieldValue: T, supportedChoices: T[]) {
   if (fieldValue === undefined) {
     // we need to support undefined fields
     return
@@ -24,7 +27,7 @@ function oneOf(field, fieldValue, supportedChoices) {
   }
 }
 
-function excludeFields(field, fieldValue, excludedFields) {
+export function excludeFields<T>(field: Field, fieldValue:T, excludedFields: string[]) {
   if (fieldValue === undefined) {
     // means value was not given
     return
@@ -37,7 +40,7 @@ function excludeFields(field, fieldValue, excludedFields) {
   }
 }
 
-function deprecated(field, fieldValue, { alternativeFieldName, output }) {
+export function deprecated<T>(field: Field, fieldValue: T, { alternativeFieldName, output } : {alternativeFieldName: string, output: (...msg: any[]) => void}) {
   if (fieldValue === undefined) {
     return
   }
@@ -48,7 +51,7 @@ function deprecated(field, fieldValue, { alternativeFieldName, output }) {
   output("Field '", field.fullPath, "' is DEPRECATED")
 }
 
-function typeValidation(field, fieldValue, typeName) {
+export function typeValidation<T>(field: Field, fieldValue: T, typeName: TypeName) {
   if (fieldValue === undefined) {
     return
   }
@@ -67,7 +70,7 @@ function typeValidation(field, fieldValue, typeName) {
   }
 }
 
-function dependsOn(field, fieldValue, fieldNames) {
+export function dependsOn<T>(field: Field, fieldValue: T, fieldNames: string[]) {
   if (fieldValue !== undefined) {
     for (const fieldName of fieldNames) {
       const value = field.phoContext.getFieldValue(fieldName)
@@ -78,39 +81,26 @@ function dependsOn(field, fieldValue, fieldNames) {
   }
 }
 
-function lowerThanOrEqualTo(field, fieldValue, inclusiveUpperBound) {
+export function lowerThanOrEqualTo<T>(field: Field, fieldValue: T, inclusiveUpperBound: T) {
   if (fieldValue > inclusiveUpperBound) {
     throw new FieldValidationError(`Field ${field.fullPath} needs to be lower or equal to ${inclusiveUpperBound}`)
   }
 }
 
-function lowerThan(field, fieldValue, exclusiveUpperBound) {
+export function lowerThan<T>(field:Field, fieldValue: T , exclusiveUpperBound: T) {
   if (fieldValue >= exclusiveUpperBound) {
     throw new FieldValidationError(`Field ${field.fullPath} needs to be lower than ${exclusiveUpperBound}`)
   }
 }
 
-function greaterThanOrEqualTo(field, fieldValue, inclusiveLowerBound) {
+export function greaterThanOrEqualTo<T>(field: Field, fieldValue:T, inclusiveLowerBound: T) {
   if (fieldValue < inclusiveLowerBound) {
     throw new FieldValidationError(`Field ${field.fullPath} needs to be greater or equal to ${inclusiveLowerBound}`)
   }
 }
 
-function greaterThan(field, fieldValue, exclusiveLowerBound) {
+export function greaterThan<T>(field:Field, fieldValue: T, exclusiveLowerBound:T) {
   if (fieldValue <= exclusiveLowerBound) {
     throw new FieldValidationError(`Field ${field.fullPath} needs to be greater than ${exclusiveLowerBound}`)
   }
-}
-
-module.exports = {
-  required,
-  oneOf,
-  dependsOn,
-  excludeFields,
-  typeValidation,
-  deprecated,
-  lowerThan,
-  greaterThanOrEqualTo,
-  greaterThan,
-  lowerThanOrEqualTo,
 }
