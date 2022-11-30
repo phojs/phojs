@@ -26,7 +26,12 @@ export class Category {
   description: null | string
   log: debug.Debugger
 
-  constructor(phoContext: null | PhoContext = null, name: string | null = null, fullPath: string | null = null, description: string | null = null) {
+  constructor(
+    phoContext: null | PhoContext = null,
+    name: string | null = null,
+    fullPath: string | null = null,
+    description: string | null = null
+  ) {
     this.phoContext = phoContext ?? new PhoContext()
     this.name = name // null means root
     this.fullPath = fullPath
@@ -104,7 +109,7 @@ export class Category {
         if (current === undefined) {
           break
         }
-        current = (current as Record<string,any>)[part] 
+        current = (current as Record<string, any>)[part]
       }
       return current as any
     }
@@ -187,4 +192,4 @@ export class Category {
   }
 }
 
-export type DecriptionRow = { description : string, type: TypeName, defaultValue?: any}
+export type DecriptionRow = { description: string; type: TypeName; defaultValue?: any }

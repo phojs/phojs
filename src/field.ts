@@ -21,7 +21,7 @@ import { PhoContext } from './context'
 import { IField } from './types'
 
 export type Constant = { value: number | string | boolean }
-export type FieldRef = { ref: string}
+export type FieldRef = { ref: string }
 
 function isFieldRef(value: any): value is FieldRef {
   return value.ref !== undefined
@@ -233,7 +233,7 @@ export class Field<T> implements IField {
   }
 
   greaterThanOrEqualTo(inclusiveLowerBound: FieldRef | Constant) {
-    let args : any
+    let args: any
     const dependencies: string[] = []
     if (isFieldRef(inclusiveLowerBound)) {
       dependencies.push(inclusiveLowerBound.ref)
@@ -245,7 +245,7 @@ export class Field<T> implements IField {
   }
 
   greaterThan(exclusiveLowerBound: FieldRef | Constant) {
-    let args:any
+    let args: any
     const dependencies: string[] = []
     if (isFieldRef(exclusiveLowerBound)) {
       dependencies.push(exclusiveLowerBound.ref)
@@ -261,10 +261,9 @@ export class Field<T> implements IField {
    * @param {number} inclusiveLowerBound - the inclusive lower bound
    * @param {number} exclusiveUpperBound - the exclusive upper bound
    */
-  inRangeOf(inclusiveLowerBound: FieldRef|Constant, exclusiveUpperBound: FieldRef | Constant) {
+  inRangeOf(inclusiveLowerBound: FieldRef | Constant, exclusiveUpperBound: FieldRef | Constant) {
     this.greaterThanOrEqualTo(inclusiveLowerBound)
     this.lowerThan(exclusiveUpperBound)
     return this
   }
-
 }
