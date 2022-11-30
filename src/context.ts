@@ -7,9 +7,9 @@ export interface Node {
 }
 
 export interface Link {
-  source: string;
-  target: string;
-  weight: number;
+  source: string
+  target: string
+  weight: number
 }
 
 export interface SerializedGraph {

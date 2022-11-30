@@ -5,9 +5,8 @@ import {
   InvalidFieldTypeError,
   FieldValidationError,
 } from './errors'
-import {IField} from './types'
-
-export type TypeName = 'string' | 'number' | 'integer'
+import { IField } from './types'
+import type { TypeName } from './types'
 
 export function required<T>(field: IField, fieldValue: T, isRequired: boolean) {
   if (isRequired && fieldValue === undefined) {
@@ -27,7 +26,7 @@ export function oneOf<T>(field: IField, fieldValue: T, supportedChoices: T[]) {
   }
 }
 
-export function excludeField<T>(field: IField, fieldValue:T, excludedFields: string[]) {
+export function excludeFields<T>(field: IField, fieldValue: T, excludedFields: string[]) {
   if (fieldValue === undefined) {
     // means value was not given
     return
@@ -40,7 +39,11 @@ export function excludeField<T>(field: IField, fieldValue:T, excludedFields: str
   }
 }
 
-export function deprecated<T>(field: IField, fieldValue: T, { alternativeFieldName, output } : {alternativeFieldName: string, output: (...msg: any[]) => void}) {
+export function deprecated<T>(
+  field: IField,
+  fieldValue: T,
+  { alternativeFieldName, output }: { alternativeFieldName: string; output: (...msg: any[]) => void }
+) {
   if (fieldValue === undefined) {
     return
   }
@@ -87,19 +90,19 @@ export function lowerThanOrEqualTo<T>(field: IField, fieldValue: T, inclusiveUpp
   }
 }
 
-export function lowerThan<T>(field: IField, fieldValue: T , exclusiveUpperBound: T) {
+export function lowerThan<T>(field: IField, fieldValue: T, exclusiveUpperBound: T) {
   if (fieldValue >= exclusiveUpperBound) {
     throw new FieldValidationError(`Field ${field.fullPath} needs to be lower than ${exclusiveUpperBound}`)
   }
 }
 
-export function greaterThanOrEqualTo<T>(field: IField, fieldValue:T, inclusiveLowerBound: T) {
+export function greaterThanOrEqualTo<T>(field: IField, fieldValue: T, inclusiveLowerBound: T) {
   if (fieldValue < inclusiveLowerBound) {
     throw new FieldValidationError(`Field ${field.fullPath} needs to be greater or equal to ${inclusiveLowerBound}`)
   }
 }
 
-export function greaterThan<T>(field: IField, fieldValue: T, exclusiveLowerBound:T) {
+export function greaterThan<T>(field: IField, fieldValue: T, exclusiveLowerBound: T) {
   if (fieldValue <= exclusiveLowerBound) {
     throw new FieldValidationError(`Field ${field.fullPath} needs to be greater than ${exclusiveLowerBound}`)
   }

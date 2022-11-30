@@ -14,13 +14,13 @@ export class ArrayFieldType extends FieldType {
   }
 }
 
-export class ArrayField<T> extends Field<T> {
-  constructor(phoContext: PhoContext | null = null, name = null, fullPath = null, description = null, defaultValue: T) {
+export class ArrayField extends Field<any> {
+  constructor(phoContext: PhoContext, name: string, fullPath: string, description: string , defaultValue: any[]) {
     super(phoContext, name, fullPath, new ArrayFieldType(), description, defaultValue)
   }
 
   minimumLength(minLength: number) {
-    this.validate('minimum length', (field: Field, fieldValue: any) => {
+    this.validate('minimum length', (field: Field<any>, fieldValue: any[]) => {
       if (fieldValue.length < minLength) {
         throw new FieldValidationError(`Expected minimum length of ${minLength} but got ${fieldValue.length}`)
       }
@@ -28,7 +28,7 @@ export class ArrayField<T> extends Field<T> {
   }
 
   exclusiveMinimumLength(minLength: number) {
-    this.validate('exclusive minimum length', (field: Field, fieldValue: any) => {
+    this.validate('exclusive minimum length', (field: Field<any>, fieldValue: any[]) => {
       if (fieldValue.length <= minLength) {
         throw new FieldValidationError(`Expected exclusive minimum length of ${minLength} but got ${fieldValue.length}`)
       }
@@ -36,7 +36,7 @@ export class ArrayField<T> extends Field<T> {
   }
 
   maximumLength(maxLength: number) {
-    this.validate('maximum length', (field: Field, fieldValue: any) => {
+    this.validate('maximum length', (field: Field<any>, fieldValue: any) => {
       if (fieldValue.length > maxLength) {
         throw new FieldValidationError(`Expected maximum length of ${maxLength} but got ${fieldValue.length}`)
       }
@@ -44,7 +44,7 @@ export class ArrayField<T> extends Field<T> {
   }
 
   exclusiveMaximumLength(maxLength: number) {
-    this.validate('exclusive maximum length', (field: Field, fieldValue: any) => {
+    this.validate('exclusive maximum length', (field: Field<any>, fieldValue: any) => {
       if (fieldValue.length >= maxLength) {
         throw new FieldValidationError(`Expected exclusive maximum length of ${maxLength} but got ${fieldValue.length}`)
       }

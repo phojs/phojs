@@ -1,139 +1,144 @@
-import process from "process";
+import process from 'process'
 import debug from 'debug'
-import { FieldFunc, FieldLogic } from "./field-logic"
-import { MissingDependencyError } from "./errors"
-import { FieldType } from "./field-type"
+import { FieldFunc, FieldLogic } from './field-logic'
+import { MissingDependencyError } from './errors'
+import { FieldType } from './field-type'
 import {
   required,
   oneOf,
   dependsOn,
-  excludeField,
+  excludeFields,
   typeValidation,
   deprecated,
-
   greaterThanOrEqualTo,
   greaterThan,
   lowerThanOrEqualTo,
   lowerThan,
-} from "./validation-functions";
+} from './validation-functions'
 
-import rootLogger from "./root-logger";
-import { PhoContext } from "../dist/context";
-import { IField } from "./types";
+import rootLogger from './root-logger'
+import { PhoContext } from './context'
+import { IField } from './types'
 
-export class Field<T> implements IField{
-  name: string;
-  fullPath: string;
-  type: any;
-  description: string;
-  defaultValue: T;
+export type Constant = { value: number | string | boolean }
+export type FieldRef = { ref: string}
+
+function isFieldRef(value: any): value is FieldRef {
+  return value.ref !== undefined
+}
+
+export class Field<T> implements IField {
+  name: string
+  fullPath: string
+  type: any
+  description: string
+  defaultValue: T
+
   phoContext: PhoContext
   log: debug.Debugger
-  modifiers: any[]
-  validators: any[]
+  modifiers: FieldLogic[]
+  validators: FieldLogic[]
 
   constructor(phoContext: PhoContext, name: string, fullPath: string, type: any, description: string, defaultValue: T) {
-    this.name = name;
-    this.fullPath = fullPath;
-    this.type = type;
-    this.description = description;
-    this.defaultValue = defaultValue;
-    this.phoContext = phoContext;
-    this.log = rootLogger.extend("Field");
+    this.name = name
+    this.fullPath = fullPath
+    this.type = type
+    this.description = description
+    this.defaultValue = defaultValue
+    this.phoContext = phoContext
+    this.log = rootLogger.extend('Field')
 
-    this.modifiers = [];
-    this.validators = [];
+    this.modifiers = []
+    this.validators = []
 
     // assume we are a child of root which means we don't depend on any other field
     // to be validated/modified
-    this.phoContext.dependencyGraph.addEdge("__root", this.fullPath);
-    this.addTypeValidation();
+    this.phoContext.dependencyGraph.addEdge('__root', this.fullPath)
+    this.addTypeValidation()
   }
 
   addTypeValidation() {
     if (!this.type) {
-      return;
+      return
     }
 
     if (this.type instanceof FieldType) {
-      this.addValidator(this.type);
-      return;
+      this.addValidator(this.type)
+      return
     }
 
-    this.addValidator(
-      new FieldLogic("type validation", typeValidation, this.type)
-    );
+    this.addValidator(new FieldLogic('type validation', typeValidation, this.type))
   }
 
   /*
    * @param fieldLogic - FieldLogic object
    */
   handleDependencies(fieldLogic: FieldLogic) {
-    this.log.extend("handleDependencies")(fieldLogic);
+    this.log.extend('handleDependencies')(fieldLogic)
     if (fieldLogic.dependsOn.length > 0) {
-      this.log("Unlinking from root");
-      this.phoContext.dependencyGraph.removeEdge("__root", this.fullPath); //
+      this.log('Unlinking from root')
+      this.phoContext.dependencyGraph.removeEdge('__root', this.fullPath) //
     }
 
     fieldLogic.dependsOn.forEach((field) => {
-      this.log("Linking", field, "=>", this.fullPath);
-      this.phoContext.dependencyGraph.addEdge(field, this.fullPath);
-    });
+      this.log('Linking', field, '=>', this.fullPath)
+      this.phoContext.dependencyGraph.addEdge(field, this.fullPath)
+    })
   }
 
   addValidator(validator: FieldLogic) {
-    this.validators.push(validator);
-    this.handleDependencies(validator);
+    this.validators.push(validator)
+    this.handleDependencies(validator)
   }
 
   addModifier(modifier: FieldLogic) {
-    this.modifiers.push(modifier);
-    this.handleDependencies(modifier);
+    this.modifiers.push(modifier)
+    this.handleDependencies(modifier)
   }
 
   getDependencyValues(fieldLogic: FieldLogic) {
-    let dependantFieldValues = [];
+    let dependantFieldValues: any[] = []
     for (const dependencyName of fieldLogic.dependsOn) {
-      const depValue = this.phoContext.getFieldValue(dependencyName);
+      const depValue = this.phoContext.getFieldValue(dependencyName)
       if (fieldLogic.dependenciesRequired && depValue === undefined) {
         throw new MissingDependencyError(
           `FieldLogic ${fieldLogic.name} is missing a dependant value: ${dependencyName}`
-        );
+        )
       }
-      dependantFieldValues.push(depValue);
+      dependantFieldValues.push(depValue)
     }
-    return dependantFieldValues;
+    return dependantFieldValues
   }
 
   parse(value: object) {
-    const parserLog = this.log.extend("parser");
-    parserLog(this.fullPath, "parsing", value, "default =", this.defaultValue);
+    const parserLog = this.log.extend('parser')
+    parserLog(this.fullPath, 'parsing', value, 'default =', this.defaultValue)
 
-    let current = value ?? this.defaultValue ?? value;
+    let current = value ?? this.defaultValue ?? value
     for (const modifier of this.modifiers) {
-      parserLog(this.fullPath, "running modifier", modifier.name);
-      const dependantFieldValues = this.getDependencyValues(modifier);
-      current = modifier.run(this, current, ...dependantFieldValues);
-      parserLog(this.fullPath, "new current =", current);
+      parserLog(this.fullPath, 'running modifier', modifier.name)
+      const dependantFieldValues = this.getDependencyValues(modifier)
+      current = modifier.run(this, current, ...dependantFieldValues)
+      parserLog(this.fullPath, 'new current =', current)
     }
 
     for (const validator of this.validators) {
-      parserLog(this.fullPath, 'running validation "', validator.name, '"');
-      const dependantFieldValues = this.getDependencyValues(validator);
-      validator.run(this, current, ...dependantFieldValues);
+      parserLog(this.fullPath, 'running validation "', validator.name, '"')
+      const dependantFieldValues = this.getDependencyValues(validator)
+      validator.run(this, current, ...dependantFieldValues)
     }
 
-    return current;
+    return current
   }
 
-  validate(name: string, validateFunc: FieldFunc, dependsOn: string[] = [], args:any[] = []) {
-    this.addValidator(new FieldLogic(name, validateFunc, args, dependsOn));
-    return this;
+  validate(name: string, validateFunc: FieldFunc, dependsOn: string[] = [], args?: any) {
+    this.addValidator(new FieldLogic(name, validateFunc, args, dependsOn))
+    return this
   }
 
-  modify(name: string, validateFunc: FieldFunc, dependsOn = [], args = []) {
-    this.addModifier(new FieldLogic(name, validateFunc, args, dependsOn));
-    return this;
+  modify(name: string, modifyFunc: FieldFunc, dependsOn: string[] = [], args?: any) {
+    this.addModifier(new FieldLogic(name, modifyFunc, args, dependsOn))
+    return this
   }
 
   /**
@@ -141,8 +146,8 @@ export class Field<T> implements IField{
    * @param fieldNames - varargs of all the fields that should exist
    */
   dependsOn(...fieldNames: string[]) {
-    this.validate("dependsOn", dependsOn, fieldNames, fieldNames);
-    return this;
+    this.validate('dependsOn', dependsOn, fieldNames, fieldNames)
+    return this
   }
 
   /**
@@ -150,26 +155,26 @@ export class Field<T> implements IField{
    * @param isRequired - should the field be required or not.
    */
   required(isRequired = true) {
-    this.validate("required", required, [], isRequired);
-    return this;
+    this.validate('required', required, [], isRequired)
+    return this
   }
 
   /**
    * The field's value can only be one of the given choices.
    * @param choices - the field's supported values
    */
-  oneOf(...choices) {
-    this.validate("oneOf", oneOf, [], choices);
-    return this;
+  oneOf(...choices: T[]) {
+    this.validate('oneOf', oneOf, [], choices)
+    return this
   }
 
   /*
    * This field cannot be defined together with the fields given
    * @param fields - fields that this field excludes.
    */
-  excludes(...fields) {
-    this.validate("excludeFields", excludeFields, fields, fields);
-    return this;
+  excludes(...fields: string[]) {
+    this.validate('excludeFields', excludeFields, fields, fields)
+    return this
   }
 
   /*
@@ -177,79 +182,78 @@ export class Field<T> implements IField{
    * @param - an alternative field name to mention for the user to use instead of deprecated one
    */
   deprecated({ alternativeFieldName = null, output = console.error } = {}) {
-    this.validate("deprecated", deprecated, [], {
+    this.validate('deprecated', deprecated, [], {
       alternativeFieldName,
       output,
-    });
-    return this;
+    })
+    return this
   }
 
-  lowerThanOrEqualTo(inclusiveUpperBound) {
-    let args = [];
-    const dependencies = [];
-    if (typeof inclusiveUpperBound === "string") {
-      dependencies.push(inclusiveUpperBound);
-    } else {
-      args = inclusiveUpperBound;
-    }
-    this.validate(
-      `lowerThanOrEqualTo ${inclusiveUpperBound}`,
-      lowerThanOrEqualTo,
-      dependencies,
-      args
-    );
-    return this;
+  fromEnv(envVarName: string) {
+    this.modify(`load from ENV ${envVarName}`, (field: Field<any>, value: any) => {
+      // if value is not given, override it with the value from the env var
+      const envValue = process.env[envVarName]
+      if (value !== undefined || envValue === undefined) {
+        return value
+      }
+      switch (field.type) {
+        case 'integer':
+          return parseInt(envValue)
+        case 'number':
+          return parseFloat(envValue)
+        default:
+          return envValue
+      }
+    })
+    return this
   }
 
-  lowerThan(exclusiveUpperBound) {
-    let args = [];
-    const dependencies = [];
-    if (typeof exclusiveUpperBound === "string") {
-      dependencies.push(exclusiveUpperBound);
+  lowerThanOrEqualTo(inclusiveUpperBound: FieldRef | Constant) {
+    let args: any
+    const dependencies: string[] = []
+    if (isFieldRef(inclusiveUpperBound)) {
+      dependencies.push(inclusiveUpperBound.ref)
     } else {
-      args = exclusiveUpperBound;
+      args = (inclusiveUpperBound as Constant).value
     }
-    this.validate(
-      `lowerThan ${exclusiveUpperBound}`,
-      lowerThan,
-      dependencies,
-      args
-    );
-    return this;
+    this.validate(`lowerThanOrEqualTo ${inclusiveUpperBound}`, lowerThanOrEqualTo, dependencies, args)
+    return this
   }
 
-  greaterThanOrEqualTo(inclusiveLowerBound) {
-    let args = [];
-    const dependencies = [];
-    if (typeof inclusiveLowerBound === "string") {
-      dependencies.push(inclusiveLowerBound);
+  lowerThan(exclusiveUpperBound: FieldRef | Constant) {
+    let args: any
+    const dependencies: string[] = []
+    if (isFieldRef(exclusiveUpperBound)) {
+      dependencies.push(exclusiveUpperBound.ref)
     } else {
-      args = inclusiveLowerBound;
+      args = exclusiveUpperBound.value
     }
-    this.validate(
-      `lowerThanOrEqualTo ${inclusiveLowerBound}`,
-      greaterThanOrEqualTo,
-      dependencies,
-      args
-    );
-    return this;
+    this.validate(`lowerThan ${exclusiveUpperBound}`, lowerThan, dependencies, args)
+    return this
   }
 
-  greaterThan(exclusiveLowerBound) {
-    let args = [];
-    const dependencies = [];
-    if (typeof exclusiveLowerBound === "string") {
-      dependencies.push(exclusiveLowerBound);
+  greaterThanOrEqualTo(inclusiveLowerBound: FieldRef | Constant) {
+    let args : any
+    const dependencies: string[] = []
+    if (isFieldRef(inclusiveLowerBound)) {
+      dependencies.push(inclusiveLowerBound.ref)
     } else {
-      args = exclusiveLowerBound;
+      args = inclusiveLowerBound.value
     }
-    this.validate(
-      `greaterThan ${exclusiveLowerBound}`,
-      greaterThan,
-      dependencies,
-      args
-    );
-    return this;
+    this.validate(`lowerThanOrEqualTo ${inclusiveLowerBound}`, greaterThanOrEqualTo, dependencies, args)
+    return this
+  }
+
+  greaterThan(exclusiveLowerBound: FieldRef | Constant) {
+    let args:any
+    const dependencies: string[] = []
+    if (isFieldRef(exclusiveLowerBound)) {
+      dependencies.push(exclusiveLowerBound.ref)
+    } else {
+      args = exclusiveLowerBound.value
+    }
+    this.validate(`greaterThan ${exclusiveLowerBound}`, greaterThan, dependencies, args)
+    return this
   }
 
   /*
@@ -257,28 +261,10 @@ export class Field<T> implements IField{
    * @param {number} inclusiveLowerBound - the inclusive lower bound
    * @param {number} exclusiveUpperBound - the exclusive upper bound
    */
-  inRangeOf(inclusiveLowerBound, exclusiveUpperBound) {
-    this.greaterThanOrEqualTo(inclusiveLowerBound);
-    this.lowerThan(exclusiveUpperBound);
-    return this;
+  inRangeOf(inclusiveLowerBound: FieldRef|Constant, exclusiveUpperBound: FieldRef | Constant) {
+    this.greaterThanOrEqualTo(inclusiveLowerBound)
+    this.lowerThan(exclusiveUpperBound)
+    return this
   }
 
-  fromEnv(envVarName: string) {
-    this.modify(`load from ENV ${envVarName}`, (field, value) => {
-      // if value is not given, override it with the value from the env var
-      const envValue = process.env[envVarName];
-      if (value !== undefined || envValue === undefined) {
-        return value;
-      }
-      switch (field.type) {
-        case "integer":
-          return parseInt(envValue);
-        case "number":
-          return parseFloat(envValue);
-        default:
-          return envValue;
-      }
-    });
-    return this;
-  }
 }
