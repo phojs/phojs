@@ -1,6 +1,6 @@
 {
   "name": "phojs",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Declarative configuration framework",
   "main": "dist/index.js",
   "license": "MIT",
