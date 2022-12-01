@@ -181,7 +181,10 @@ export class Field<T> implements IField {
    * Outputs a deprecation warning using console.error when a deprecated field is used
    * @param - an alternative field name to mention for the user to use instead of deprecated one
    */
-  deprecated({ alternativeFieldName = null, output = console.error } = {}) {
+  deprecated({
+    alternativeFieldName = null,
+    output = console.error,
+  }: { alternativeFieldName?: null | string; output?: any } = {}) {
     this.validate('deprecated', deprecated, [], {
       alternativeFieldName,
       output,

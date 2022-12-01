@@ -1,4 +1,5 @@
-const { Pho } = require('../')
+import { Pho } from '../src'
+import { TypeName } from '../src/types'
 
 describe('Basic Tests', function () {
   it('should parse a simple, single level configuration with fields only', function () {
@@ -21,11 +22,11 @@ describe('Basic Tests', function () {
   })
 
   it.each([
-    ['string', 123],
-    ['number', 'foo'],
-    ['boolean', 444],
-    ['integer', 'bla'],
-    ['integer', 123.4],
+    ['string' as TypeName, 123],
+    ['number' as TypeName, 'foo'],
+    ['boolean' as TypeName, 444],
+    ['integer' as TypeName, 'bla'],
+    ['integer' as TypeName, 123.4],
   ])('should fail if given an wrong type value in field with type "%s"', function (builtinType, fieldValue) {
     const pho = new Pho()
     pho.field('test-field', builtinType, 'test field')

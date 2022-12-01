@@ -40,7 +40,7 @@ export class Category {
     this.log = rootLogger.extend(fullPath ?? 'Pho')
   }
 
-  field<T>(name: string, type: TypeName, description: string, defaultValue: T) {
+  field<T>(name: string, type: TypeName, description: string, defaultValue?: T): Field<T> {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
     if (this.phoContext.definitions[childFullPath]) {
@@ -59,7 +59,7 @@ export class Category {
     return this.phoContext.definitions[childFullPath]
   }
 
-  category(name: string, description: string, cb: ((cat: Category) => void) | null = null) {
+  category(name: string, description: string, cb: ((cat: Category) => void) | null = null): Category {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
 
@@ -84,7 +84,7 @@ export class Category {
     return this.phoContext.definitions[childFullPath]
   }
 
-  array(name: string, description: string, defaultValue: any[]) {
+  array(name: string, description: string, defaultValue?: any[]): ArrayField {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
     if (this.phoContext.definitions[childFullPath]) {
@@ -102,7 +102,7 @@ export class Category {
     return this.phoContext.definitions[childFullPath]
   }
 
-  flattenByDefinitions(config: Record<string, any>): Record<string, any> {
+  private flattenByDefinitions(config: Record<string, any>): Record<string, any> {
     const fetchField = (fullPath: string) => {
       let current: Field<any> | Record<string, any> = config
       for (const part of fullPath.split('.')) {
@@ -121,7 +121,7 @@ export class Category {
     return flattenConfig
   }
 
-  unflattenByDefinitions() {
+  private unflattenByDefinitions() {
     let result: any = {}
 
     const setField = (fullPath: string, definition: any, value: any) => {

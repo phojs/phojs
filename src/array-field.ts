@@ -15,7 +15,7 @@ export class ArrayFieldType extends FieldType {
 }
 
 export class ArrayField extends Field<any> {
-  constructor(phoContext: PhoContext, name: string, fullPath: string, description: string, defaultValue: any[]) {
+  constructor(phoContext: PhoContext, name: string, fullPath: string, description: string, defaultValue?: any[]) {
     super(phoContext, name, fullPath, new ArrayFieldType(), description, defaultValue)
   }
 

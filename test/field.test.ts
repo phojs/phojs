@@ -1,4 +1,4 @@
-const { Pho, FieldValidationError, DependencyCycleError } = require('../')
+import { Pho, FieldValidationError, DependencyCycleError } from '../src'
 
 describe('Builtin Field validators tests', function () {
   it('should fail parsing when a required field is missing', function () {
@@ -168,10 +168,10 @@ describe('Builtin Field validators tests', function () {
       }
     }
 
-    let msg = null
+    let msg: any = null
     pho.field('oldField', 'string', 'an old field').deprecated({
       alternativeFieldName: 'newField',
-      output: (...text) => {
+      output: (...text: any[]) => {
         msg = text
       },
     })
@@ -291,9 +291,9 @@ describe('Field dependency tests', function () {
   it('should fail if there is a dependency cycle between more than 2 fields', function () {
     const pho = new Pho()
 
-    pho.field('first', 'number', 'First number').greaterThan('second')
-    pho.field('second', 'number', 'Second number').greaterThan('third')
-    pho.field('third', 'number', 'Third number').greaterThan('first')
+    pho.field('first', 'number', 'First number').greaterThan({ ref: 'second' })
+    pho.field('second', 'number', 'Second number').greaterThan({ ref: 'third' })
+    pho.field('third', 'number', 'Third number').greaterThan({ ref: 'first' })
 
     expect(() => {
       const result = pho.parse({
@@ -310,7 +310,7 @@ describe('Field bultiin range validator tests', function () {
     const pho = new Pho()
 
     pho.field('first', 'number', 'First number').required()
-    pho.field('second', 'number', 'Second number').lowerThan(10)
+    pho.field('second', 'number', 'Second number').lowerThan({ value: 10 })
 
     expect(() => {
       const result = pho.parse({
@@ -330,7 +330,7 @@ describe('Field bultiin range validator tests', function () {
   it('should fail to parse if lowerThanOrEqualTo is used and value is greater than constant', function () {
     const pho = new Pho()
 
-    pho.field('value', 'number', 'value number').lowerThanOrEqualTo(10)
+    pho.field('value', 'number', 'value number').lowerThanOrEqualTo({ value: 10 })
 
     expect(() => {
       const result = pho.parse({
@@ -354,7 +354,7 @@ describe('Field bultiin range validator tests', function () {
   it('should fail to parse if greaterThan is used and value is lower than constant', function () {
     const pho = new Pho()
 
-    pho.field('value', 'number', 'value number').greaterThan(10)
+    pho.field('value', 'number', 'value number').greaterThan({ value: 10 })
 
     expect(() => {
       const result = pho.parse({
@@ -378,7 +378,7 @@ describe('Field bultiin range validator tests', function () {
   it('should fail to parse if greaterThanOrEqualTo is used and value is lower than constant', function () {
     const pho = new Pho()
 
-    pho.field('value', 'number', 'value number').greaterThanOrEqualTo(10)
+    pho.field('value', 'number', 'value number').greaterThanOrEqualTo({ value: 10 })
 
     expect(() => {
       const result = pho.parse({
@@ -402,7 +402,7 @@ describe('Field bultiin range validator tests', function () {
   it('should fail to parse if inRangeOf is used and value is outside the range in constants', function () {
     const pho = new Pho()
 
-    pho.field('value', 'number', 'value in range').inRangeOf(10, 20)
+    pho.field('value', 'number', 'value in range').inRangeOf({ value: 10 }, { value: 20 })
 
     expect(() => {
       const result = pho.parse({
@@ -434,7 +434,7 @@ describe('Field bultiin range validator tests', function () {
     const pho = new Pho()
 
     pho.field('first', 'number', 'First number').required()
-    pho.field('second', 'number', 'Second number').lowerThan('first')
+    pho.field('second', 'number', 'Second number').lowerThan({ ref: 'first' })
 
     expect(() => {
       const result = pho.parse({
@@ -454,7 +454,7 @@ describe('Field bultiin range validator tests', function () {
   it('should fail to parse if lowerThanOrEqualTo is used and value is greater than other field', function () {
     const pho = new Pho()
 
-    pho.field('second', 'number', 'Second number').lowerThanOrEqualTo('first')
+    pho.field('second', 'number', 'Second number').lowerThanOrEqualTo({ ref: 'first' })
     pho.field('first', 'number', 'First number').required()
 
     expect(() => {
@@ -476,7 +476,7 @@ describe('Field bultiin range validator tests', function () {
     const pho = new Pho()
 
     pho.field('first', 'number', 'First number').required()
-    pho.field('second', 'number', 'Second number').greaterThan('first')
+    pho.field('second', 'number', 'Second number').greaterThan({ ref: 'first' })
 
     expect(() => {
       const result = pho.parse({
@@ -496,7 +496,7 @@ describe('Field bultiin range validator tests', function () {
   it('should fail to parse if greaterThanOrEqualTo is used and value is lower than other field', function () {
     const pho = new Pho()
 
-    pho.field('second', 'number', 'Second number').greaterThanOrEqualTo('first')
+    pho.field('second', 'number', 'Second number').greaterThanOrEqualTo({ ref: 'first' })
     pho.field('first', 'number', 'First number').required()
 
     expect(() => {
@@ -518,8 +518,8 @@ describe('Field bultiin range validator tests', function () {
     const pho = new Pho()
 
     pho.field('lower', 'number', 'lower bound').required()
-    pho.field('upper', 'number', 'upper bound').greaterThan('lower')
-    pho.field('value', 'number', 'value in range').inRangeOf('lower', 'upper')
+    pho.field('upper', 'number', 'upper bound').greaterThan({ ref: 'lower' })
+    pho.field('value', 'number', 'value in range').inRangeOf({ ref: 'lower' }, { ref: 'upper' })
 
     expect(() => {
       const result = pho.parse({

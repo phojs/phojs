@@ -1,4 +1,4 @@
-const { Pho, FieldValidationError } = require('../')
+const { Pho, FieldValidationError } = require('../src')
 
 describe('Builtin ArrayField validators tests', function () {
   it('should fail parsing when a array length is higher than maximumLength', function () {

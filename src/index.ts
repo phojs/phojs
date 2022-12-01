@@ -24,6 +24,7 @@ const describe = () => _globalRootInstance.describe()
 const parse = (config: object) => _globalRootInstance.parse(config)
 
 export {
+  Category as Pho,
   category,
   field,
   array,
