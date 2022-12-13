@@ -61,7 +61,7 @@ export function typeValidation<T>(field: IField, fieldValue: T, typeName: TypeNa
   if (typeName.toLowerCase() === 'integer') {
     if (!Number.isInteger(fieldValue)) {
       throw new InvalidFieldTypeError(
-        `Expected field '${field.fullPath}' to be 'integer', but it isnt (value=${fieldValue})`
+        `Expected field '${field.fullPath}' to be 'integer', but it is not (value=${fieldValue})`
       )
     }
   } else {

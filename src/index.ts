@@ -18,8 +18,8 @@ const category = (name: string, description: string, cb: ((cat: Category) => voi
 function field<T>(name: string, type: TypeName, description: string, defaultValue: T) {
   return _globalRootInstance.field(name, type, description, defaultValue)
 }
-const array = (name: string, description: string, defaultValue: any[]) =>
-  _globalRootInstance.array(name, description, defaultValue)
+const array = (name: string, description: string, type: TypeName | null, defaultValue?: any[]) =>
+  _globalRootInstance.array(name, description, type, defaultValue)
 const describe = () => _globalRootInstance.describe()
 const parse = (config: object) => _globalRootInstance.parse(config)
 

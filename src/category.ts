@@ -1,10 +1,10 @@
 import rootLogger from './root-logger'
 import { Field } from './field'
-import { ArrayField } from './array-field'
+import {CategoryArrayField, SimpleArrayField} from './simple-array-field'
 import { InvalidFieldNameError, CategoryIsFieldError } from './errors'
 import { PhoContext } from './context'
 import debug from 'debug'
-import { TypeName } from './types'
+import {TypeName} from './types'
 
 function ensureValidName(name: string) {
   if (name.indexOf('.') !== -1) {
@@ -84,19 +84,41 @@ export class Category {
     return this.phoContext.definitions[childFullPath]
   }
 
-  array(name: string, description: string, defaultValue?: any[]): ArrayField {
+  array(name: string, description: string, type: TypeName | null = null, defaultValue?: any[]): SimpleArrayField {
     ensureValidName(name)
     const childFullPath = createFullPath(this.fullPath, name)
     if (this.phoContext.definitions[childFullPath]) {
       return this.phoContext.definitions[childFullPath]
     }
-    this.log('Adding new Array(', name, ',', childFullPath, ',', description, ',', defaultValue, ')')
-    this.phoContext.definitions[childFullPath] = new ArrayField(
-      this.phoContext,
-      name,
-      childFullPath,
-      description,
-      defaultValue
+    this.log('Adding new Simple Array(', name, ',', childFullPath, ',', description, ',', type, ',', ')')
+    this.phoContext.definitions[childFullPath] = new SimpleArrayField(
+        this.phoContext,
+        name,
+        childFullPath,
+        description,
+        type,
+        defaultValue,
+    )
+    this.phoContext.schema.addEdge(this.fullPath ?? '__root', childFullPath)
+    return this.phoContext.definitions[childFullPath]
+  }
+
+  categoryArray(name: string, description: string, cb: (obj: Category) => void, defaultValue?: any[]) {
+    ensureValidName(name)
+    const childFullPath = createFullPath(this.fullPath, name)
+    if (this.phoContext.definitions[childFullPath]) {
+      return this.phoContext.definitions[childFullPath]
+    }
+    const categoryField = new Category(null, '', null, description)
+    cb(categoryField)
+    this.log('Adding new Category Array(', name, ',', childFullPath, ',', description, ',', ')')
+    this.phoContext.definitions[childFullPath] = new CategoryArrayField(
+        this.phoContext,
+        name,
+        childFullPath,
+        description,
+        categoryField,
+        defaultValue,
     )
     this.phoContext.schema.addEdge(this.fullPath ?? '__root', childFullPath)
     return this.phoContext.definitions[childFullPath]
@@ -149,7 +171,7 @@ export class Category {
     return result
   }
 
-  parse(config: object) {
+    parse(config: object) {
     this.log('Parsing', config)
     this.phoContext.ensureNoDependencyCycles()
 
