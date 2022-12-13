@@ -84,26 +84,4 @@ describe('Basic Tests', function () {
     expect(pho.parse({})).toStrictEqual(expected)
     expect(pho.parse({ firstname: 'Luke' })).toStrictEqual({ ...expected, firstname: 'Luke' })
   })
-
-  test('should parse a an array with a given schema', function () {
-    const pho = new Pho()
-
-    pho.field('name', 'string', 'Your name')
-    pho.field('age', 'number', 'Your age', 30)
-    pho.categoryArray('hobbies', 'Your hobbies', (hobbies) => {
-      hobbies.field('name', 'string', 'Hobby name').required().oneOf('dancing', 'running', 'fishing')
-      hobbies.field('type', 'string', 'Hobby type', 'light')
-    })
-
-    const test = {
-      name: 'anton',
-      hobbies: [{ name: 'running', type: 'physical'},{ name: 'dancing', type: 'physical'}, {name: 'fishing'}],
-    }
-    const expected = {
-      name: 'anton',
-      age: 30,
-      hobbies: [{ name: 'running', type: 'physical'},{ name: 'dancing', type: 'physical'}, {name: 'fishing', type: 'light'}],
-    }
-    expect(pho.parse(test)).toStrictEqual(expected)
-  })
 })
