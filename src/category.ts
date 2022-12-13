@@ -180,7 +180,7 @@ export class Category {
         type: fieldDefinition.type,
       }
       if (fieldDefinition.defaultValue !== undefined) {
-        row.defaultValue = fieldDefinition
+        row.defaultValue = fieldDefinition.defaultValue
       }
       result[fieldName] = row
     }
