@@ -1,8 +1,9 @@
 import { Pho } from '../src'
 import { TypeName } from '../src/types'
 
+
 describe('Basic Tests', function () {
-  it('should parse a simple, single level configuration with fields only', function () {
+  test('should parse a simple, single level configuration with fields only', function () {
     const pho = new Pho()
 
     pho.field('firstname', 'string', 'Your first name')
@@ -21,7 +22,7 @@ describe('Basic Tests', function () {
     expect(result).toStrictEqual(validConfig)
   })
 
-  it.each([
+  test.each([
     ['string' as TypeName, 123],
     ['number' as TypeName, 'foo'],
     ['boolean' as TypeName, 444],
@@ -40,7 +41,7 @@ describe('Basic Tests', function () {
     }).toThrow()
   })
 
-  it('should successfuly parse a config file with a category', function () {
+  test('should successfuly parse a config file with a category', function () {
     const pho = new Pho()
 
     pho.field('firstname', 'string', 'Your first name')
@@ -65,13 +66,13 @@ describe('Basic Tests', function () {
     expect(result).toStrictEqual(validConfig)
   })
 
-  it('should parse a simple with default value', function () {
+  test('should parse a simple with default value', function () {
     const pho = new Pho()
 
     pho.field('firstname', 'string', 'Your first name', 'Anakin')
     pho.field('lastname', 'string', 'Your last name', 'Skywalker')
     pho.field('age', 'number', 'Your age', 20)
-    pho.array('hobbies', 'Your hobbies', ['the force', 'lightsabers', 'death stars'])
+    pho.array('hobbies', 'Your hobbies', 'string', ['the force', 'lightsabers', 'death stars'])
 
     const expected = {
       firstname: 'Anakin',

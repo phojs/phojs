@@ -30,7 +30,7 @@ function isFieldRef(value: any): value is FieldRef {
 export class Field<T> implements IField {
   name: string
   fullPath: string
-  type: any
+  category: any
   description: string
   defaultValue: T
 
@@ -42,7 +42,7 @@ export class Field<T> implements IField {
   constructor(phoContext: PhoContext, name: string, fullPath: string, type: any, description: string, defaultValue: T) {
     this.name = name
     this.fullPath = fullPath
-    this.type = type
+    this.category = type
     this.description = description
     this.defaultValue = defaultValue
     this.phoContext = phoContext
@@ -58,16 +58,16 @@ export class Field<T> implements IField {
   }
 
   addTypeValidation() {
-    if (!this.type) {
+    if (!this.category) {
       return
     }
 
-    if (this.type instanceof FieldType) {
-      this.addValidator(this.type)
+    if (this.category instanceof FieldType) {
+      this.addValidator(this.category)
       return
     }
 
-    this.addValidator(new FieldLogic('type validation', typeValidation, this.type))
+    this.addValidator(new FieldLogic('type validation', typeValidation, this.category))
   }
 
   /*
@@ -199,7 +199,7 @@ export class Field<T> implements IField {
       if (value !== undefined || envValue === undefined) {
         return value
       }
-      switch (field.type) {
+      switch (field.category) {
         case 'integer':
           return parseInt(envValue)
         case 'number':
