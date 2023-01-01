@@ -194,12 +194,12 @@ export class Category {
   /**
    * Returns an object filled with field definitions full paths and their descriptions with default values
    */
-  describe(): Record<string, DecriptionRow> {
-    let result: Record<string, DecriptionRow> = {}
+  describe(): Record<string, DescriptionRow> {
+    let result: Record<string, DescriptionRow> = {}
     for (const [fieldName, fieldDefinition] of Object.entries(this.phoContext.definitions)) {
-      const row: DecriptionRow = {
+      const row: DescriptionRow = {
         description: fieldDefinition.description,
-        type: fieldDefinition.type,
+        type: fieldDefinition.category,
       }
       if (fieldDefinition.defaultValue !== undefined) {
         row.defaultValue = fieldDefinition.defaultValue
@@ -214,4 +214,4 @@ export class Category {
   }
 }
 
-export type DecriptionRow = { description: string; type: TypeName; defaultValue?: any }
+export type DescriptionRow = { description: string; type: TypeName; defaultValue?: any }
