@@ -16,7 +16,6 @@ jobs:
         with:
           node-version: 16
       - run: yarn
-      - run: yarn build
       - run: yarn test
 
   publish-npm:
@@ -29,6 +28,7 @@ jobs:
           node-version: 16
           registry-url: https://registry.npmjs.org/
       - run: yarn
+      - run: yarn build
       - run: yarn publish
         env:
           NODE_AUTH_TOKEN: ${{secrets.npm_token}}
