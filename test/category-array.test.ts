@@ -1,5 +1,5 @@
 import {Pho} from "../src"
-import {MissingRequiredFieldError} from "../dist/errors";
+
 
 describe('Category Array Tests', function () {
     test('should parse an array with a given schema', function () {
